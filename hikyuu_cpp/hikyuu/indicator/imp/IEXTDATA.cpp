@@ -20,7 +20,8 @@ IEXTDATA::IEXTDATA() : IndicatorImp("EXTDATA", 1) {
     setParam<int>("ndigits", 1);
     setParam<string>("filepath", "");
 }
- 
+
+// 自定义数据结构
 
 void IEXTDATA::_calculate(const Indicator& ind) {
     KData kdata = ind.getContext();
@@ -29,73 +30,96 @@ void IEXTDATA::_calculate(const Indicator& ind) {
         kdata = getContext();
         total = kdata.size();
         if (total == 0) {
-            KData kdata = getContext();
             return;
         }
-        
     }
     _readyBuffer(total, 1);
-    Stock stock =kdata.getStock();
-     
+    Stock stock = kdata.getStock();
+
     m_discard = ind.discard();
     if (m_discard >= total) {
         m_discard = total;
         return;
     }
 
-    int n = getParam<int>("ndigits"); 
-    
-    string FILE_NAME= getParam<string>("filepath");
+    int n = getParam<int>("ndigits");
+
+    string FILE_NAME = getParam<string>("filepath");
     if (FILE_NAME.empty()) {
         std::cerr << "获取文件路径参数失败" << std::endl;
         return;
     }
-    string DATASET_NAME=stock.market_code();
+    string tablename = stock.market_code();
     string GROUP_NAME = "data";
-    
-    H5::H5File h5file(FILE_NAME, H5F_ACC_RDONLY);//读取hdf5文件中的数据
-    H5::Group group = h5file.openGroup(GROUP_NAME);// 打开指定的 group
-    H5::DataSet dataset = group.openDataSet(DATASET_NAME);
-    H5::DataSpace dataspace = dataset.getSpace();// 获取数据集的数据空间
 
-    // 获取数据集的维度信息
-    hsize_t dims[2];
-    int ndims = dataspace.getSimpleExtentDims(dims, NULL);
-    if (ndims != 2 || dims[1] < 1 || static_cast<size_t>(n) > dims[1]) {
-        std::cerr << "数据集不是二维、列数不足或者 n 超出范围" << dims[1]<<std::endl;
-        return;
+    try {
+        H5::H5File h5file(FILE_NAME, H5F_ACC_RDONLY);
+        H5::Group group = h5file.openGroup(GROUP_NAME);
+
+        if (!H5Lexists(group.getId(), tablename.c_str(), H5P_DEFAULT)) {
+            std::cerr << "数据集 " << tablename << " 不存在于组 " << GROUP_NAME << " 中。" << std::endl;
+            return;
+        }
+
+        H5::DataSet dataset = group.openDataSet(tablename);
+        H5::DataSpace dataspace = dataset.getSpace();
+
+        size_t all_total = dataspace.getSelectNpoints();
+        H5::DataType datatype = dataset.getDataType();
+
+        // 获取每个数据点的大小（以字节为单位）
+        size_t point_size = datatype.getSize();
+        const int NUM_UINT32 = static_cast<int>((point_size - 8) / 4);
+
+        if (n > NUM_UINT32+1) {
+            std::cerr << "索引 n 超出范围" << std::endl;
+            return;
+        }
+
+        // 使用 std::vector 动态存储 uint32_t 数据
+        struct Record {
+            uint32_t uint32_values1;
+            uint32_t uint32_values2;
+            uint32_t uint32_values3;
+            uint32_t uint32_values4;
+            uint32_t uint32_values5;
+            uint32_t uint32_values6;
+            uint64_t uint64_value;
+        };
+
+        std::unique_ptr<Record[]> pBuf = std::make_unique<Record[]>(all_total);
+        // for (hsize_t i = 0; i < all_total; ++i) {
+        //     pBuf[i].uint32_values.resize(NUM_UINT32);
+        // }
+
+        hsize_t offsets[1] = {0};
+        hsize_t count[1] = {all_total};
+        H5::DataSpace memspace(1, count);
+        dataspace.selectHyperslab(H5S_SELECT_SET, count, offsets);
+
+        dataset.read(pBuf.get(), datatype, memspace, dataspace);
+
+        memspace.close();
+        dataspace.close();
+        dataset.close();
+        group.close();
+        h5file.close();
+        size_t x_total = all_total;
+        size_t x_start = 0;
+        auto* dst = this->data();
+        if (x_total < total) {
+            dst = dst + total + m_discard - x_total;
+        } else if (x_total > total) {
+            x_start = x_total - total;
+            dst = dst - x_start;
+        }
+        for (size_t i = x_start; i < x_total; ++i) {
+            dst[i] = (pBuf[i].uint32_values1);
+        }
+
+    } catch (const H5::Exception& e) {
+        std::cerr << "HDF5 操作出错: " << e.getDetailMsg() << std::endl;
     }
-
-    // 重新选择数据空间以读取第 n 列的数据
-    hsize_t offset_data[2] = {0, static_cast<hsize_t>(n)};
-    hsize_t count_data[2] = {dims[0], 1};
-    dataspace.selectHyperslab(H5S_SELECT_SET, count_data, offset_data);
-
-    // 创建用于存储第 n 列数据的内存数据空间
-    hsize_t mem_dims_data[1] = {dims[0]};
-    H5::DataSpace memspace_data(1, mem_dims_data);
-
-    // 创建存储第 n 列数据的数组
-    double* data = new double[dims[0]];
-
-    // 读取第 n 列数据
-    dataset.read(data, H5::PredType::NATIVE_DOUBLE, memspace_data, dataspace);
-
-   //舍弃数量 m_discard 暂不考虑 这里处理m_discard=0的情况
-    size_t x_total=dims[0];//输入数据数量
-    size_t x_start = 0;
-    auto* dst = this->data();
-    if (x_total < total) {//RPS数据少于输出，dst+差值
-        dst = dst + total + m_discard - x_total;
-    } else if (x_total > total) {//RPS数据大于输出，dst+差值
-        x_start = x_total - total;
-        dst = dst - x_start;
-    }
-    for (size_t i = x_start; i < x_total; ++i) {
-        dst[i] = data[i];
-    }
-    delete[] data;
-
 }
 
 
