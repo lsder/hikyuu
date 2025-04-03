@@ -17,12 +17,29 @@ BOOST_CLASS_EXPORT(hku::IEXTDATA)
 namespace hku {
 
 IEXTDATA::IEXTDATA() : IndicatorImp("EXTDATA", 1) {
-    setParam<int>("ndigits", 1);
+    setParam<string>("targetField", "");
     setParam<string>("filepath", "");
 }
 
 // 自定义数据结构
+template<typename T>
+T getFieldValue(const char* pBuf, const H5::CompType& compType, const std::string& fieldName, size_t index, size_t point_size) {
+    int numFields = compType.getNmembers();
+    for (int i = 0; i < numFields; ++i) {
+        std::string currentFieldName = compType.getMemberName(i);
+        if (currentFieldName == fieldName) {
+            size_t fieldOffset = compType.getMemberOffset(i);
+            H5::DataType fieldType = compType.getMemberDataType(i);
+            size_t fieldSize = fieldType.getSize();
 
+            // 计算数据在 pBuf 中的位置
+            const char* dataPtr = pBuf + index * point_size + fieldOffset;
+            return *reinterpret_cast<const T*>(dataPtr);
+        }
+    }
+    std::cerr << "未找到字段: " << fieldName << std::endl;
+    return T();
+}
 void IEXTDATA::_calculate(const Indicator& ind) {
     KData kdata = ind.getContext();
     size_t total = kdata.size();
@@ -42,7 +59,7 @@ void IEXTDATA::_calculate(const Indicator& ind) {
         return;
     }
 
-    int n = getParam<int>("ndigits");
+    string targetField = getParam<string>("targetField");
 
     string FILE_NAME = getParam<string>("filepath");
     if (FILE_NAME.empty()) {
@@ -69,41 +86,16 @@ void IEXTDATA::_calculate(const Indicator& ind) {
 
         // 获取每个数据点的大小（以字节为单位）
         size_t point_size = datatype.getSize();
-        const int NUM_UINT32 = static_cast<int>((point_size - 8) / 4);
-
-        if (n > NUM_UINT32+1) {
-            std::cerr << "索引 n 超出范围" << std::endl;
-            return;
-        }
-
-        // 使用 std::vector 动态存储 uint32_t 数据
-        struct Record {
-            uint32_t uint32_values1;
-            uint32_t uint32_values2;
-            uint32_t uint32_values3;
-            uint32_t uint32_values4;
-            uint32_t uint32_values5;
-            uint32_t uint32_values6;
-            uint64_t uint64_value;
-        };
-
-        std::unique_ptr<Record[]> pBuf = std::make_unique<Record[]>(all_total);
-        // for (hsize_t i = 0; i < all_total; ++i) {
-        //     pBuf[i].uint32_values.resize(NUM_UINT32);
-        // }
 
         hsize_t offsets[1] = {0};
         hsize_t count[1] = {all_total};
         H5::DataSpace memspace(1, count);
         dataspace.selectHyperslab(H5S_SELECT_SET, count, offsets);
 
-        dataset.read(pBuf.get(), datatype, memspace, dataspace);
+        // 分配内存给 pBuf
+        char* pBuf = new char[all_total * point_size];
+        dataset.read(pBuf, datatype, memspace, dataspace);
 
-        memspace.close();
-        dataspace.close();
-        dataset.close();
-        group.close();
-        h5file.close();
         size_t x_total = all_total;
         size_t x_start = 0;
         auto* dst = this->data();
@@ -113,9 +105,20 @@ void IEXTDATA::_calculate(const Indicator& ind) {
             x_start = x_total - total;
             dst = dst - x_start;
         }
-        for (size_t i = x_start; i < x_total; ++i) {
-            dst[i] = (pBuf[i].uint32_values1);
-        }
+        H5::CompType compType=CompType(dataset);
+         for (size_t i = x_start; i < x_total; ++i) {
+             int value = getFieldValue<int>(pBuf, compType, targetField, i, point_size);
+             dst[i] = value;
+         }
+    
+         // 处理完数据后释放内存
+         delete[] pBuf;
+
+        memspace.close();
+        dataspace.close();
+        dataset.close();
+        group.close();
+        h5file.close();
 
     } catch (const H5::Exception& e) {
         std::cerr << "HDF5 操作出错: " << e.getDetailMsg() << std::endl;
@@ -123,9 +126,9 @@ void IEXTDATA::_calculate(const Indicator& ind) {
 }
 
 
-Indicator HKU_API EXTDATA(int n,const string& filepath ) {
+Indicator HKU_API EXTDATA(const string& targetfield,const string& filepath ) {
     auto p = make_shared<IEXTDATA>();
-    p->setParam<int>("ndigits", n);
+    p->setParam<string>("targetField", targetfield);
     p->setParam<string>("filepath",filepath);
     return Indicator(p);
 }

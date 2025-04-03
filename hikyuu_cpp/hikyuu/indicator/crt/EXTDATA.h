@@ -16,9 +16,9 @@ namespace hku {
  */
 
  
-Indicator HKU_API EXTDATA(int n ,const string&  file_path);
-inline Indicator EXTDATA(const Indicator& ind,int n,const string&  file_path) {
-    return EXTDATA(n,file_path)(ind);
+Indicator HKU_API EXTDATA(const string& targetfield ,const string&  file_path);
+inline Indicator EXTDATA(const Indicator& ind,const string& targetfield,const string&  file_path) {
+    return EXTDATA(targetfield,file_path)(ind);
 }
 
 }  // namespace hku
