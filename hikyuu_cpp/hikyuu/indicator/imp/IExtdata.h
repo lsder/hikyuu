@@ -1,5 +1,5 @@
 /*
- * IEXTDATA.h
+ * IExtdata.h
  *
  *  Created on: 2013-2-11
  *      Author: fasiondog
@@ -14,15 +14,15 @@
 #include <vector>
 namespace hku {
 
-class IEXTDATA : public IndicatorImp {
-    INDICATOR_IMP(IEXTDATA)
+class IExtdata : public IndicatorImp {
+    INDICATOR_IMP(IExtdata)
     INDICATOR_NEED_CONTEXT
     INDICATOR_IMP_NO_PRIVATE_MEMBER_SERIALIZATION
 
 public:
     string filepath;
-    IEXTDATA();
-    virtual ~IEXTDATA() = default;
+    IExtdata();
+    virtual ~IExtdata() = default;
 };
 
 } /* namespace hku */

@@ -1,5 +1,5 @@
 /*
- * IEXTDATA.h
+ * IExtdata.h
  *
  *  Created on: 2013-2-14
  *      Author: fasiondog

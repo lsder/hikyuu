@@ -1,22 +1,22 @@
 /*
- * IEXTDATA.cpp
+ * IExtdata.cpp
  *
  *  Created on: 2013-2-11
  *      Author: fasiondog
  */
 
-#include "IEXTDATA.h"
+#include "IExtdata.h"
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <H5Cpp.h>
 using namespace H5;
 #if HKU_SUPPORT_SERIALIZATION
-BOOST_CLASS_EXPORT(hku::IEXTDATA)
+BOOST_CLASS_EXPORT(hku::IExtdata)
 #endif
 
 namespace hku {
 
-IEXTDATA::IEXTDATA() : IndicatorImp("EXTDATA", 1) {
+IExtdata::IExtdata() : IndicatorImp("EXTDATA", 1) {
     setParam<string>("targetField", "");
     setParam<string>("filepath", "");
 }
@@ -40,7 +40,7 @@ T getFieldValue(const char* pBuf, const H5::CompType& compType, const std::strin
     std::cerr << "未找到字段: " << fieldName << std::endl;
     return T();
 }
-void IEXTDATA::_calculate(const Indicator& ind) {
+void IExtdata::_calculate(const Indicator& ind) {
     KData kdata = ind.getContext();
     size_t total = kdata.size();
     if (total == 0) {
@@ -127,7 +127,7 @@ void IEXTDATA::_calculate(const Indicator& ind) {
 
 
 Indicator HKU_API EXTDATA(const string& targetfield,const string& filepath ) {
-    auto p = make_shared<IEXTDATA>();
+    auto p = make_shared<IExtdata>();
     p->setParam<string>("targetField", targetfield);
     p->setParam<string>("filepath",filepath);
     return Indicator(p);
