@@ -1985,7 +1985,7 @@ void export_Indicator_build_in(py::module& m) {
           py::arg("fill_null") = true,
           R"(INSUM(block, query, ind, mode[, fill_null=True])
 
-    返回板块各成分该指标相应输出按计算类型得到的计算值.计算类型:0-累加,1-平均数,2-最大值,3-最小值.
+    返回板块各成分该指标相应输出按计算类型得到的计算值.计算类型:0-累加,1-平均数,2-最大值,3-最小值,4-排名.
 
     :param Block block: 指定板块
     :param Query query: 指定范围

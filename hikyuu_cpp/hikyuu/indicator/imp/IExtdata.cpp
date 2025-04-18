@@ -99,19 +99,62 @@ void IExtdata::_calculate(const Indicator& ind) {
         size_t x_total = all_total;
         size_t x_start = 0;
         auto* dst = this->data();
-        if (x_total < total) {
-            dst = dst + total + m_discard - x_total;
-        } else if (x_total > total) {
-            x_start = x_total - total;
-            dst = dst - x_start;
-        }
+        // if (x_total < total) {
+        //     dst = dst + total + m_discard - x_total;
+        // } else if (x_total > total) {
+        //     x_start = x_total - total;
+        //     dst = dst - x_start;
+        // }
         H5::CompType compType=CompType(dataset);
          for (size_t i = x_start; i < x_total; ++i) {
-             int value = getFieldValue<int>(pBuf, compType, targetField, i, point_size);
-             dst[i] = value;
+             float value = getFieldValue<float>(pBuf, compType, targetField, i, point_size);
+            //  dst[i] = value;
          }
+
+        // 读取RPS数据targetValues
+        PriceList targetValues;
+        for (size_t i = 0; i < all_total; ++i) {
+            float value = getFieldValue<float>(pBuf, compType, targetField, i, point_size);
+            targetValues.push_back(value);
+            // dst[i] = value;
+        }
+
+        // 读取时间列数据dates
+        DatetimeList dates;
+        string timeField="datetime";
+        for (size_t i = 0; i < all_total; ++i) {
+            // 假设时间列数据类型为 Datetime
+            Datetime date = Datetime(getFieldValue<unsigned long long>(pBuf, compType, timeField, i, point_size));
+            dates.push_back(date);
+        }
+        //kdata时间数据k
+        DatetimeList k = kdata.getDatetimeList();
+
+    if (!k.empty() && !dates.empty()) {
+        if (k[0].ymd() < dates[0].ymd()) {
+            size_t dates_pos = 0;
+            for (size_t i = 0; i < total; ++i) {
+                if (k[i].ymd() < dates[dates_pos].ymd()) {
+                    dst[i] = 0; // 假设默认值为 0
+                } else if (k[i].ymd() == dates[dates_pos].ymd()) {
+                    dst[i] = targetValues[dates_pos];
+                    dates_pos++;
+                }
+            }
+        } else {
+            size_t k_pos = 0;
+            for (size_t i = 0; i < all_total; ++i) {
+                if (k[k_pos].ymd() < dates[i].ymd()) { 
+                    continue;
+                } else if (k[k_pos].ymd() == dates[i].ymd()&&k_pos<total) {
+                    dst[k_pos] = targetValues[i];
+                    k_pos++;
+                }
+            }
+        }
+    }
     
-         // 处理完数据后释放内存
+
          delete[] pBuf;
 
         memspace.close();
@@ -132,5 +175,41 @@ Indicator HKU_API EXTDATA(const string& targetfield,const string& filepath ) {
     p->setParam<string>("filepath",filepath);
     return Indicator(p);
 }
+// size_t x_start = 0;
+//         auto* k = kdata.data();
+//         auto* dst = this->data();
+//         if (all_total < total) { \\RPS数据小于全局，遍历kdata，更新START
+//             for (size_t i = 0; i < total; ++i) {
+//                 auto value = getFieldValue<float>(pBuf, compType, 'datetime', 0, point_size);  
+//                 if (value == k[i].datetime) break;
+//                 x_start++
+//             }
+//             dst =dst-x_start;
+//             H5::CompType compType=CompType(dataset);
+//             for (size_t i = 0; i < total; ++i) {
+//                 float value = getFieldValue<float>(pBuf, compType, targetField, i, point_size);
+//                 dst[i] = value;
+//             }
+//         } else if (all_total > total) {\\RPS数据大于全局，遍历RPS，更新START
+//             for (size_t i = 0; i < total; ++i) {
+//                 auto value = getFieldValue<float>(pBuf, compType, 'datetime', i, point_size);  
+//                 if (value == k[0].datetime) break;\\TODO  转换为DATATIME或数字格式
+//                 x_start++
+//             }
+//             H5::CompType compType=CompType(dataset);
+//             for (size_t i = x_start; i < total; ++i) {
+//                 float value = getFieldValue<float>(pBuf, compType, targetField, i, point_size);
+//                 dst[i] = value;
+//             }
+//         }
+//          auto* k = kdata.data();
+    
+//         size_t cur_kix = 0;
+//         size_t pos = 0;
 
+//         H5::CompType compType=CompType(dataset);
+//          for (size_t i = 0; i < total; ++i) {
+//              float value = getFieldValue<float>(pBuf, compType, targetField, i, point_size);
+//              dst[i] = value;
+//          }
 } /* namespace hku */
