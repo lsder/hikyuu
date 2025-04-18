@@ -89,10 +89,11 @@ class UsePytdxImportToH5Thread(QThread):
         if self.config.getboolean('finance', 'enable', fallback=True):
             self.tasks.append(
                 ImportHistoryFinanceTask(self.log_queue, self.queue, self.config, dest_dir))
-
-        self.tasks.append(ImportBlockInfoTask(self.log_queue, self.queue,
-                          self.config, ('行业板块', '概念板块', '地域板块', '指数板块')))
-        self.tasks.append(ImportZhBond10Task(self.log_queue, self.queue, self.config))
+        if self.config.getboolean('finance', 'BlockInfo', fallback=True):
+            self.tasks.append(ImportBlockInfoTask(self.log_queue, self.queue,
+                            self.config, ('行业板块', '概念板块', '地域板块', '指数板块')))
+        if self.config.getboolean('finance', 'ZhBond10', fallback=True):
+            self.tasks.append(ImportZhBond10Task(self.log_queue, self.queue, self.config))
 
         task_count = 0
         market_count = len(g_market_list)

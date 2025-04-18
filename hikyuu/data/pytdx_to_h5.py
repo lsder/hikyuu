@@ -583,28 +583,28 @@ if __name__ == '__main__':
     import time
     starttime = time.time()
 
-    dest_dir = "d:\\stock"
+    dest_dir = "/home/lsder/finance/hikyuu/.hikyuu/data/stock/"
     tdx_server = '119.147.212.81'
     tdx_port = 7709
     quotations = ['stock', 'fund']
 
-    connect = sqlite3.connect(dest_dir + "\\stock.db")
-    create_database(connect)
+    connect = sqlite3.connect(dest_dir + "stock.db")
+    # create_database(connect)
+    print(get_last_date(connect,MARKETID.SZ))
+    # from pytdx.hq import TdxHq_API, TDXParams
+    # api = TdxHq_API()
+    # api.connect(tdx_server, tdx_port)
 
-    from pytdx.hq import TdxHq_API, TDXParams
-    api = TdxHq_API()
-    api.connect(tdx_server, tdx_port)
-
-    add_count = 0
+    # add_count = 0
     """
     print("导入指数代码表")
     add_count = import_index_name(connect)
     print("指数个数：", add_count)
     """
     print("导入股票代码表")
-    add_count = import_stock_name(connect, api, 'SH', quotations)
+    # add_count = import_stock_name(connect, api, 'SH', quotations)
     # add_count += import_stock_name(connect, api, 'SZ', quotations)
-    print("新增股票数：", add_count)
+    # print("新增股票数：", add_count)
     """
     print("\n导入上证日线数据")
     add_count = import_data(connect, 'SH', 'DAY', quotations, api, dest_dir, progress=ProgressBar)
@@ -656,7 +656,7 @@ if __name__ == '__main__':
     print("\n导入数量：", add_count)
     """
 
-    api.disconnect()
+    # api.disconnect()
     connect.close()
 
     endtime = time.time()
