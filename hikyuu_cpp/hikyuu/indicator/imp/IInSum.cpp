@@ -162,6 +162,11 @@ static void insum_min(const IndicatorList& inds, Indicator::value_t* dst, size_t
 }
 
 static void insum_rank(const IndicatorList& inds, Indicator::value_t* dst,const Indicator& ind, size_t len) {
+    for (size_t i = 0; i < len; i++) {
+        if (std::isnan(dst[i])) {
+            dst[i] = 1;//相当于初始化
+        }
+    }
     for (const auto& value : inds) {//单个ind
         if (value.empty()) {
             continue;
@@ -173,11 +178,7 @@ static void insum_rank(const IndicatorList& inds, Indicator::value_t* dst,const 
         }
         const auto* data = value.data();//对比股的数据
         const auto* data_ind=ind.data();//本股数据
-        for (size_t i = 0; i < len; i++) {
-            if (std::isnan(dst[i])) {
-                dst[i] = 0;//相当于初始化
-            }
-        }
+        
     
         for (size_t i = 0; i < len; i++) {
             if (!std::isnan(data[i])) {
