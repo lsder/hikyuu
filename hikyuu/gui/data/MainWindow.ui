@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1269</width>
-    <height>690</height>
+    <height>797</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -60,7 +60,7 @@
                 <bool>true</bool>
                </property>
                <property name="text">
-                <string>使用Pytdx（推荐）</string>
+                <string>使用Pytdx下载数据</string>
                </property>
               </widget>
              </item>
@@ -140,13 +140,26 @@
             </layout>
            </item>
            <item>
-            <layout class="QGridLayout" name="gridLayout_2">
+            <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0">
              <property name="leftMargin">
               <number>10</number>
              </property>
              <property name="bottomMargin">
               <number>10</number>
              </property>
+             <item row="0" column="3">
+              <widget class="QPushButton" name="select_tdx_dir_pushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>选择</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="label_2">
                <property name="text">
@@ -164,16 +177,20 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="3">
-              <widget class="QPushButton" name="select_tdx_dir_pushButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_24">
+             <property name="leftMargin">
+              <number>10</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QRadioButton" name="qmt_radioButton">
                <property name="text">
-                <string>选择</string>
+                <string>使用 qmt 数据下载（需要 miniqmt）（屏蔽，qmt下载数据太慢，且不稳定）</string>
                </property>
               </widget>
              </item>
@@ -380,7 +397,7 @@
                  <second>0</second>
                  <year>1989</year>
                  <month>12</month>
-                 <day>30</day>
+                 <day>27</day>
                 </datetime>
                </property>
                <property name="calendarPopup">
@@ -432,7 +449,7 @@
                  <second>0</second>
                  <year>1989</year>
                  <month>12</month>
-                 <day>30</day>
+                 <day>27</day>
                 </datetime>
                </property>
                <property name="calendarPopup">
@@ -1750,6 +1767,184 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </layout>
         </item>
        </layout>
+      </widget>
+      <widget class="QWidget" name="tab_star">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <attribute name="title">
+        <string>项目VIP</string>
+       </attribute>
+       <widget class="QLabel" name="label_44">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>380</y>
+          <width>291</width>
+          <height>171</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>../images/star.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_46">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>20</y>
+          <width>561</width>
+          <height>221</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Hikyuu 作为长期持续维护的开源项目，&lt;span style=&quot; font-weight:700;&quot;&gt;专注于量化交易领域的核心技术构建，涵盖交易模型开发、极速计算引擎、高效回测框架及实盘拓展能力&lt;/span&gt;，定位为量化交易的基础设施级计算引擎，为量化交易爱好者和专业提供高性能底层架构支持。随着社区规模扩大，项目持续迭代及技术支持事务逐渐分散了作者在策略研究上的精力。为保障项目的专注度与可持续性，现推出 &amp;quot;VIP计划&amp;quot;，通过提供部分VIP功能作为回馈，构建良性的项目发展生态。诚挚期待社区伙伴的支持，您的参与都将直接助力 Hikyuu 的技术创新，共同推动量化交易基础设施的迭代升级。&lt;/p&gt;&lt;p&gt;VIP功能以插件的方式提供，采用独立授权许可，完全在 hikyuu 之外，对喜欢自行编译扩展的朋友没有影响。因插件许可授权需要采集硬件信息，如有疑虑只要不申请试用许可和正式许可授权，不会触发硬件信息采集。&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;正式许可授权除资金支持外，亦可通过其他方式获取，详情参见：&lt;/span&gt;&lt;a href=&quot;https://gitee.com/fasiondog/hikyuu/blob/master/vip-plan.md&quot;&gt;&lt;span style=&quot; font-weight:700; text-decoration: underline; color:#3586ff;&quot;&gt;VIP计划&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-weight:700;&quot;&gt; 中 &amp;quot;如何获取免费授权和延长授权时间&amp;quot; 章节，已提供的VIP功能亦在其中，可自行查看，感谢大家的支持！&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="Line" name="line_2">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>240</y>
+          <width>531</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_47">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>260</y>
+          <width>151</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>申请试用许可（30天试用）</string>
+        </property>
+       </widget>
+       <widget class="Line" name="line_3">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>330</y>
+          <width>531</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_48">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>356</y>
+          <width>331</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>加入知识星球，获取星球许可（可同时在3台设备上使用）</string>
+        </property>
+       </widget>
+       <widget class="Line" name="line_4">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>560</y>
+          <width>531</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_49">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>580</y>
+          <width>81</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>当前授权信息</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_license">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>610</y>
+          <width>521</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>290</y>
+          <width>511</width>
+          <height>33</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_20">
+         <item>
+          <widget class="QLabel" name="label_45">
+           <property name="text">
+            <string>电子邮件地址:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="email_lineEdit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="fetch_trial_pushButton">
+           <property name="text">
+            <string>申请试用许可</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </item>

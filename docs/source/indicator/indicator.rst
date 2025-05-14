@@ -224,13 +224,16 @@
     :rtype: Indicator
 
 
-.. py:function:: CONTEXT(ind)
+.. py:function:: CONTEXT([ind, fill_null=False, use_self_ktype=False, use_self_recover_type=False])
     
     独立上下文。使用 ind 自带的上下文。当指定新的上下文时，不会改变已有的上下文。
     例如：ind = CLOSE(k1), 当指定新的上下文 ind = ind(k2) 时，使用的是 k2 的收盘价。如想仍使用 k1 收盘价，
     则需使用 ind = CONTEXT(CLOSE(k1)), 此时 ind(k2) 将仍旧使用 k1 的收盘价。
     
     :param Indicator ind: 指标对象
+    :param bool fill_null: 日期对齐时，缺失日期对应填充空值，否则使用前值填充。
+    :param bool use_self_ktype: 公式计算时使用自身独立上下文中的KTYPE
+    :param bool use_self_recover_type: 公式计算时使用自身独立上下文中的RECOVER_TYPE
     :rtype: Indicator
 
 .. py:function:: CONTEXT_K(ind)
@@ -931,13 +934,13 @@
     :rtype: Indicator
 
 
-.. py:function:: PRICELIST(data[, result_index=0, discard=0])
+.. py:function:: PRICELIST([data=None, discard=0, align_dates=None])
     
     将 list、tuple、Indicator 转化为普通的 Indicator
     
-    :param data: 输入数据，可以为 list、tuple、Indicator
-    :param int result_index: 当data为Indicator实例时，指示Indicator的第几个结果集
-    :param int discard: 在 data 为 Indicator类型时无效。表示前端抛弃的数据点数，抛弃的值使用 constant.null_price 填充
+    :param sequence data: 输入数据
+    :param int discard: 丢弃前多少个数据
+    :param sequence align_dates: 对齐日期列表，如果为空则不进行对齐
     :rtype: Indicator
  
  

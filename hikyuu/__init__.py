@@ -1,31 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*-
 # cp936
-#
-# The MIT License (MIT)
-#
-# Copyright (c) 2010-2017 fasiondog
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 
+from pathlib import Path
+import pickle
+import traceback
 __copyright__ = """
-MIT License
+Apache License Version 2.0
 
 Copyright (c) 2010-2017 fasiondog
 
@@ -48,10 +29,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import traceback
 import sys
-import pickle
 import os
+BASE_DIR = os.path.dirname(__file__)
+if sys.platform == 'win32':
+    # add_dll_directory() 有时不生效
+    os.add_dll_directory(os.path.join(os.path.dirname(__file__), 'cpp'))
+    # 添加动态库所在的目录路径
+    current_path = os.environ.get('PATH', '')
+    dll_directory = os.path.join(BASE_DIR, 'cpp')
+    new_path = f"{dll_directory};{current_path}"
+    os.environ['PATH'] = new_path
+else:
+    current_path = os.environ.get('LD_LIBRARY_PATH', '')
+    dll_directory = os.path.join(BASE_DIR, 'cpp')
+    new_path = f"{dll_directory}:{current_path}" if current_path else dll_directory
+    os.environ['LD_LIBRARY_PATH'] = new_path
+
 
 try:
     from .util import *
@@ -74,33 +68,17 @@ except Exception as e:
     raise e
 
 
-__copyright__ = """
-MIT License
-
-Copyright (c) 2010-2017 fasiondog
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-"""
-
 __version__ = get_version()
 
 sm = StockManager.instance()
+
+plugin_path = Path.home() / '.hikyuu' / 'plugin'
+if plugin_path.exists():
+    plugin_path = str(plugin_path)
+else:
+    plugin_path = os.path.join(os.path.dirname(__file__), 'plugin')
+sm.set_plugin_path(plugin_path)
+print(f"current plugin path: {plugin_path}")
 
 
 class iodog:
@@ -252,6 +230,12 @@ def load_hikyuu(**kwargs):
     hku_param["datadir"] = ini.get('hikyuu', 'datadir')
     if ini.has_option('hikyuu', 'quotation_server'):
         hku_param["quotation_server"] = ini['hikyuu']['quotation_server']
+    hku_param["load_history_finance"] = ini.getboolean("hikyuu", "load_history_finance", fallback=True)
+    hku_param["load_stock_weight"] = ini.getboolean("hikyuu", "load_stock_weight", fallback=True)
+    if ini.has_option('hikyuu', 'plugindir'):
+        hku_param["plugindir"] = ini.get('hikyuu', 'plugindir')
+    else:
+        hku_param["plugindir"] = os.path.join(os.path.dirname(__file__), "plugin")
 
     base_param = Parameter()
     base_info_config = ini.options('baseinfo')
